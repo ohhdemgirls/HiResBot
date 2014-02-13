@@ -1,5 +1,4 @@
-import re, praw, requests, os, glob, sys, time
-from PIL import Image
+import re, praw, requests, os, glob, sys, time, urllib, ImageFile
 from BeautifulSoup import BeautifulSoup
 
 __author__ = 'Ben and Daniel'
@@ -10,7 +9,7 @@ class RedditBot(object):
     def __init__(self, uname, passwd):
         # Identify with name of bot
         self.api = praw.Reddit(user_agent='HiResBot')
-        # Which subreddit to run on
+        # Which subreddit to run on -- Temp for now, we'll handle this better that rawinput
         self.input = raw_input("What subreddit would you like to run on? ")
         self.subreddit = self.api.get_subreddit(self.input)
         # Some regex
@@ -18,10 +17,30 @@ class RedditBot(object):
 
     def upload_new(self):
          #self.api.upload_image(self.subreddit, image_path, name=None, header=False)
-         pass
-
+         #Aren't we just going to post a comment! This would make a post!
+         pass 
+        
     def checkHigherRes(self, imageUrl):
-        print imageUrl
+        imgRes = self.getsizes(imageUrl)
+        if imgRes[0] < 640: # Less than 480p
+            print imageUrl +", Not HD"
+        else:
+            print imageUrl +", HD"
+    
+    def getsizes(self, uri): # Blatantly stolen from http://effbot.org/zone/pil-image-size.htm
+        # get file size *and* image size (None if not known)
+        file = urllib.urlopen(uri)
+        p = ImageFile.Parser()
+        while 1:
+            data = file.read(1024)
+            if not data:
+                break
+            p.feed(data)
+            if p.image:
+                return p.image.size
+                break
+        file.close()
+        return None
 
     def start(self):
         while True:
